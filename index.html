@@ -6,44 +6,95 @@
     <title>ScoreMatch — Live Sports & Chess</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        /* ========== GLOBAL ========== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-alt: #1e2a38;
+            --border: #334155;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #065f46;
+            --success-light: #bbf7d0;
+            --danger: #7f1d1d;
+            --danger-light: #fecaca;
+            --warning: #7c2d12;
+            --warning-light: #fed7aa;
+            --live-indicator: #ff4d6d;
+            --live-pulse: #ff758f;
+            --chess-time: #1d4ed8;
+            --turn-yellow: #fbbf24;
         }
 
         body {
-            background: #0f172a;
-            color: #e2e8f0;
+            background-color: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
-        /* 🔐 Auth Container */
+        /* ========== UTILITIES ========== */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .fade-out { animation: fadeOut 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ========== AUTH ========== */
         #auth-container {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            transition: opacity 0.4s, transform 0.4s;
         }
 
         .auth-box {
-            background: #1e293b;
+            background: var(--card-bg);
             border-radius: 16px;
             padding: 32px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .auth-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
+            border-radius: 16px 16px 0 0;
         }
 
         .auth-box h2 {
             text-align: center;
             margin-bottom: 24px;
-            color: #94a3b8;
+            color: var(--text-muted);
             font-weight: 600;
+            font-size: 1.5rem;
         }
 
         .form-group {
@@ -54,22 +105,23 @@
             display: block;
             margin-bottom: 6px;
             font-size: 0.9rem;
-            color: #94a3b8;
+            color: var(--text-muted);
         }
 
         input {
             width: 100%;
             padding: 12px 16px;
             border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0f172a;
+            border: 1px solid var(--border);
+            background: var(--bg);
             color: white;
             font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         input:focus {
             outline: none;
-            border-color: #3b82f6;
+            border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
@@ -81,23 +133,35 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, background 0.2s;
         }
 
-        #login-btn, #signup-btn, #verify-otp-btn {
-            background: #3b82f6;
+        .btn-primary {
+            background: var(--primary);
             color: white;
         }
-
-        #login-btn:hover, #signup-btn:hover, #verify-otp-btn:hover {
-            opacity: 0.9;
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            opacity: 1;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-warning {
+            background: #8b5cf6;
+            color: white;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .switch-form {
             text-align: center;
             margin-top: 16px;
             font-size: 0.9rem;
-            color: #94a3b8;
+            color: var(--text-muted);
         }
 
         .switch-form a {
@@ -111,15 +175,16 @@
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .email-status.checking { background: #334155; color: #cbd5e1; }
-        .email-status.available { background: #065f46; color: #bbf7d0; }
-        .email-status.taken { background: #7f1d1d; color: #fecaca; }
-        .email-status.warning { background: #7c2d12; color: #fed7aa; }
+        .email-status.checking { background: var(--border); color: #cbd5e1; }
+        .email-status.available { background: var(--success); color: var(--success-light); }
+        .email-status.taken { background: var(--danger); color: var(--danger-light); }
+        .email-status.warning { background: var(--warning); color: var(--warning-light); }
 
-        #otp-form, #signup-form { display: none; }
-
-        /* 🎮 App Container */
+        /* ========== APP LAYOUT ========== */
         #app-container {
             display: none;
             flex-direction: column;
@@ -127,18 +192,24 @@
         }
 
         header {
-            background: #1e293b;
+            background: var(--card-bg);
             padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #334155;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo {
             font-size: 1.4rem;
             font-weight: 700;
             color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .nav-links {
@@ -147,15 +218,16 @@
         }
 
         .nav-link {
-            color: #94a3b8;
+            color: var(--text-muted);
             text-decoration: none;
             font-weight: 500;
             padding: 6px 12px;
             border-radius: 6px;
+            transition: color 0.2s, background 0.2s;
         }
         .nav-link.active, .nav-link:hover {
             color: white;
-            background: #334155;
+            background: var(--border);
         }
 
         .user-actions {
@@ -167,22 +239,37 @@
         .notification-btn {
             background: none;
             border: none;
-            color: #94a3b8;
+            color: var(--text-muted);
             font-size: 1.2rem;
             cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .notification-btn:hover {
+            background: var(--border);
+            color: white;
         }
 
         #user-display {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #3b82f6;
+            background: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             font-size: 1.1rem;
             cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #user-display:hover {
+            transform: scale(1.05);
         }
 
         main {
@@ -206,9 +293,10 @@
             margin-bottom: 16px;
             color: #f87171;
             font-weight: 600;
+            font-size: 1.2rem;
         }
 
-        /* 🔴 Match Cards */
+        /* ========== MATCH CARDS ========== */
         #live-matches {
             display: flex;
             flex-direction: column;
@@ -216,28 +304,25 @@
         }
 
         .match-card {
-            background: #1e2a38;
+            background: var(--card-alt);
             border-radius: 12px;
             padding: 16px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             position: relative;
             overflow: hidden;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .match-card:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
         .match-card.live::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 4px;
-            background: #ff4d6d;
+            background: var(--live-indicator);
             animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
 
         .match-content {
@@ -286,7 +371,7 @@
             color: #cbd5e1;
         }
         .match-teams .vs {
-            color: #94a3b8;
+            color: var(--text-muted);
             margin: 0 6px;
         }
 
@@ -297,55 +382,116 @@
             gap: 4px;
         }
         .chess-info .time {
-            background: #3b82f6;
+            background: var(--chess-time);
             color: white;
         }
         .chess-info .turn {
             font-size: 0.85rem;
-            color: #fbbf24;
+            color: var(--turn-yellow);
             font-weight: 500;
         }
         .match-teams .chess {
             font-style: italic;
-            color: #e2e8f0;
+            color: var(--text);
         }
 
-        /* Responsive */
+        /* ========== NOTIFICATIONS ========== */
+        #notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+
+        .toast {
+            background: #1e293b;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out, fadeOutLong 0.5s 4.5s forwards;
+            border-left: 4px solid #3b82f6;
+        }
+        .toast.success { border-left-color: #10b981; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.daily { 
+            border-left-color: #8b5cf6; 
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOutLong {
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        /* ========== RESPONSIVE ========== */
         @media (max-width: 600px) {
             .nav-links { display: none; }
             main { padding: 16px; }
             .match-side { font-size: 1.2rem; }
             .score { font-size: 1.4rem; }
             .time { font-size: 1rem; padding: 3px 10px; }
+            #notification-container { top: 70px; right: 10px; }
+        }
+
+        /* ========== LOADING ========== */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
+    <!-- 🔔 Notification Container (Dynamic) -->
+    <div id="notification-container"></div>
+
     <!-- 🔐 Authentication Screens -->
     <div id="auth-container">
         <div class="auth-box">
-            <h2>🔐 Login to ScoreMatch</h2>
+            <h2><i class="fas fa-lock"></i> Login to ScoreMatch</h2>
 
             <!-- Login Form -->
             <form id="login-form">
                 <div class="form-group">
                     <label for="login-email">Email (Google only)</label>
                     <input type="email" id="login-email" placeholder="contoh@gmail.com" autocomplete="off">
-                    <div id="login-email-status" class="email-status" style="display:none;"></div>
+                    <div id="login-email-status" class="email-status hidden"></div>
                 </div>
                 <div class="form-group">
                     <label for="login-password">Password</label>
                     <input type="password" id="login-password" placeholder="••••••••">
                 </div>
-                <button type="button" id="login-btn">Login</button>
+                <button type="button" id="login-btn" class="btn-primary">Login</button>
                 <div class="switch-form">
                     Belum punya akun? <a href="#" id="show-signup">Daftar Sekarang</a>
                 </div>
             </form>
 
             <!-- Signup Form -->
-            <form id="signup-form">
+            <form id="signup-form" class="hidden">
                 <div class="form-group">
                     <label for="signup-name">Nama Lengkap</label>
                     <input type="text" id="signup-name" placeholder="John Doe">
@@ -353,28 +499,29 @@
                 <div class="form-group">
                     <label for="signup-email">Email (@gmail.com only)</label>
                     <input type="email" id="signup-email" placeholder="john@gmail.com">
-                    <div id="signup-email-status" class="email-status" style="display:none;"></div>
+                    <div id="signup-email-status" class="email-status hidden"></div>
                 </div>
                 <div class="form-group">
                     <label for="signup-password">Password</label>
                     <input type="password" id="signup-password" placeholder="Minimal 6 karakter">
                 </div>
-                <button type="button" id="signup-btn">Daftar</button>
+                <button type="button" id="signup-btn" class="btn-primary">Daftar</button>
                 <div class="switch-form">
                     Sudah punya akun? <a href="#" id="show-login">Login di sini</a>
                 </div>
             </form>
 
             <!-- OTP Form -->
-            <form id="otp-form">
-                <p id="otp-instruction" style="text-align:center; margin-bottom:16px; color:#94a3b8;">
+            <form id="otp-form" class="hidden">
+                <p id="otp-instruction" style="text-align:center; margin-bottom:16px; color:var(--text-muted);">
                     Masukkan kode verifikasi 6-digit
                 </p>
                 <div class="form-group">
-                    <input type="text" id="otp-code" placeholder="______" maxlength="6" inputmode="numeric" style="text-align:center; font-size:1.4rem; letter-spacing:8px;">
-                    <div id="otp-status" class="email-status" style="display:none;"></div>
+                    <input type="text" id="otp-code" placeholder="______" maxlength="6" inputmode="numeric"
+                        style="text-align:center; font-size:1.4rem; letter-spacing:8px;">
+                    <div id="otp-status" class="email-status hidden"></div>
                 </div>
-                <button type="button" id="verify-otp-btn">Verifikasi Kode</button>
+                <button type="button" id="verify-otp-btn" class="btn-primary">Verifikasi Kode</button>
                 <div class="switch-form">
                     <a href="#" id="back-to-login">← Kembali ke Login</a>
                 </div>
@@ -385,21 +532,21 @@
     <!-- 🎮 App Dashboard -->
     <div id="app-container">
         <header>
-            <div class="logo">🏆 ScoreMatch</div>
+            <div class="logo"><i class="fas fa-trophy"></i> ScoreMatch</div>
             <nav class="nav-links">
                 <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
                 <a href="#" class="nav-link" data-page="live">Live Score</a>
                 <a href="#" class="nav-link" data-page="profile">Profil</a>
             </nav>
             <div class="user-actions">
-                <button class="notification-btn"><i class="fas fa-bell"></i></button>
+                <button class="notification-btn" id="bell-btn"><i class="fas fa-bell"></i></button>
                 <div id="user-display">A</div>
             </div>
         </header>
 
         <main>
             <div id="dashboard-page" class="page active">
-                <h2 class="greeting">Halo, <span id="profile-name">User</span>!</h2>
+                <h2 class="greeting">Halo, <span id="profile-name-display">User</span>!</h2>
 
                 <div class="section-title">
                     <i class="fas fa-fire"></i> 🔴 LIVE MATCHES
@@ -410,491 +557,521 @@
                 </div>
             </div>
 
-            <div id="live-page" class="page" style="display:none;">
+            <div id="live-page" class="page hidden">
                 <h2>Live Score Updates</h2>
                 <p>Semua pertandingan real-time ada di halaman Dashboard.</p>
             </div>
 
-            <div id="profile-page" class="page" style="display:none;">
+            <div id="profile-page" class="page hidden">
                 <h2>Profil Pengguna</h2>
-                <div style="background:#1e293b; padding:20px; border-radius:12px; margin-top:16px;">
+                <div style="background:var(--card-bg); padding:20px; border-radius:12px; margin-top:16px;">
                     <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
-                        <div id="profile-avatar" style="width:60px; height:60px; border-radius:50%; background:#3b82f6; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold;">A</div>
+                        <div id="profile-avatar" style="width:60px; height:60px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold;">A</div>
                         <div>
                             <div id="profile-name" style="font-size:1.3rem;">User Name</div>
-                            <div id="profile-email" style="color:#94a3b8;">user@gmail.com</div>
+                            <div id="profile-email" style="color:var(--text-muted);">user@gmail.com</div>
                         </div>
                     </div>
-                    <button id="logout-btn" style="background:#ef4444;">Keluar</button>
+                    <button id="logout-btn" class="btn-danger">Keluar</button>
+                    <button id="force-daily-update" class="btn-warning" style="margin-top:10px;">🔁 Force Daily Update</button>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // DOM Elements
-        const authContainer = document.getElementById('auth-container');
-        const appContainer = document.getElementById('app-container');
-        const loginForm = document.getElementById('login-form');
-        const signupForm = document.getElementById('signup-form');
-        const otpForm = document.getElementById('otp-form');
-        const showSignupBtn = document.getElementById('show-signup');
-        const showLoginBtn = document.getElementById('show-login');
-        const loginBtn = document.getElementById('login-btn');
-        const signupBtn = document.getElementById('signup-btn');
-        const verifyOtpBtn = document.getElementById('verify-otp-btn');
-        const backToLoginBtn = document.getElementById('back-to-login');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userDisplay = document.getElementById('user-display');
-        const liveMatchesContainer = document.getElementById('live-matches');
-        const navLinks = document.querySelectorAll('.nav-link');
-        const pages = document.querySelectorAll('.page');
-
-        // ✅ Helper: cek apakah email Google (hanya @gmail.com)
-        function isGmail(email) {
-            return email.toLowerCase().endsWith('@gmail.com');
-        }
-
-        // ✅ Helper: debounced email check
-        let emailCheckTimeout;
-        function debounceEmailCheck(callback, delay = 500) {
-            return function(...args) {
-                clearTimeout(emailCheckTimeout);
-                emailCheckTimeout = setTimeout(() => callback(...args), delay);
+        // ==============================
+        // 🔧 ScoreMatch Core Module
+        // ==============================
+        const ScoreMatch = (function() {
+            // DOM Cache
+            const DOM = {
+                authContainer: document.getElementById('auth-container'),
+                appContainer: document.getElementById('app-container'),
+                loginForm: document.getElementById('login-form'),
+                signupForm: document.getElementById('signup-form'),
+                otpForm: document.getElementById('otp-form'),
+                loginEmail: document.getElementById('login-email'),
+                loginPassword: document.getElementById('login-password'),
+                signupName: document.getElementById('signup-name'),
+                signupEmail: document.getElementById('signup-email'),
+                signupPassword: document.getElementById('signup-password'),
+                otpCode: document.getElementById('otp-code'),
+                loginBtn: document.getElementById('login-btn'),
+                signupBtn: document.getElementById('signup-btn'),
+                verifyOtpBtn: document.getElementById('verify-otp-btn'),
+                showSignupBtn: document.getElementById('show-signup'),
+                showLoginBtn: document.getElementById('show-login'),
+                backToLoginBtn: document.getElementById('back-to-login'),
+                logoutBtn: document.getElementById('logout-btn'),
+                userDisplay: document.getElementById('user-display'),
+                profileNameDisplay: document.getElementById('profile-name-display'),
+                profileName: document.getElementById('profile-name'),
+                profileEmail: document.getElementById('profile-email'),
+                profileAvatar: document.getElementById('profile-avatar'),
+                liveMatchesContainer: document.getElementById('live-matches'),
+                navLinks: document.querySelectorAll('.nav-link'),
+                pages: document.querySelectorAll('.page'),
+                notificationContainer: document.getElementById('notification-container'),
+                forceDailyUpdateBtn: document.getElementById('force-daily-update')
             };
-        }
 
-        // ✅ Fungsi utama: cek status email
-        function checkEmailStatus(email, isLogin = true) {
-            if (!email || email.length < 5) {
-                if (isLogin) document.getElementById('login-email-status').style.display = 'none';
-                else document.getElementById('signup-email-status').style.display = 'none';
-                return;
-            }
+            // State
+            let emailCheckTimeout = null;
 
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const isValid = emailRegex.test(email);
-            const isGoogle = isGmail(email);
-
-            const statusEl = isLogin
-                ? document.getElementById('login-email-status')
-                : document.getElementById('signup-email-status');
-
-            if (!isValid) {
-                statusEl.textContent = '📧 Format email tidak valid';
-                statusEl.className = 'email-status checking';
-                statusEl.style.display = 'block';
-                return;
-            }
-
-            if (!isGoogle) {
-                statusEl.textContent = '⚠️ Hanya akun @gmail.com yang diizinkan!';
-                statusEl.className = 'email-status warning';
-                statusEl.style.display = 'block';
-                return;
-            }
-
-            statusEl.textContent = '⏳ Memeriksa...';
-            statusEl.className = 'email-status checking';
-            statusEl.style.display = 'block';
-
-            setTimeout(() => {
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
-
-                if (isLogin) {
-                    if (exists) {
-                        statusEl.textContent = '✅ Akun Google ditemukan.';
-                        statusEl.className = 'email-status available';
-                    } else {
-                        statusEl.textContent = '❌ Akun tidak terdaftar. Silakan daftar.';
-                        statusEl.className = 'email-status taken';
-                    }
-                } else {
-                    if (exists) {
-                        statusEl.textContent = '❌ Email sudah terdaftar!';
-                        statusEl.className = 'email-status taken';
-                    } else {
-                        statusEl.textContent = '✅ Email Google tersedia.';
-                        statusEl.className = 'email-status available';
-                    }
-                }
-            }, 300);
-        }
-
-        // Pasang event listener email
-        document.getElementById('login-email').addEventListener('input', debounceEmailCheck((e) => {
-            checkEmailStatus(e.target.value.trim(), true);
-        }));
-        document.getElementById('login-email').addEventListener('blur', (e) => {
-            checkEmailStatus(e.target.value.trim(), true);
-        });
-        document.getElementById('signup-email').addEventListener('input', debounceEmailCheck((e) => {
-            checkEmailStatus(e.target.value.trim(), false);
-        }));
-        document.getElementById('signup-email').addEventListener('blur', (e) => {
-            checkEmailStatus(e.target.value.trim(), false);
-        }));
-
-        // Toggle forms
-        showSignupBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginForm.style.display = 'block';
-            signupForm.style.display = 'block';
-            otpForm.style.display = 'none';
-            loginForm.style.display = 'none';
-            document.getElementById('login-email-status').style.display = 'none';
-        });
-        showLoginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            signupForm.style.display = 'none';
-            loginForm.style.display = 'block';
-            otpForm.style.display = 'none';
-            document.getElementById('signup-email-status').style.display = 'none';
-        });
-
-        // Initialize users DB
-        if (!localStorage.getItem('users')) {
-            const demoUsers = [
-                { name: "Admin ScoreMatch", email: "admin@gmail.com", password: "admin123" },
-                { name: "User Demo", email: "user@gmail.com", password: "user123" }
-            ];
-            localStorage.setItem('users', JSON.stringify(demoUsers));
-        }
-
-        // Handle signup
-        signupBtn.addEventListener('click', () => {
-            const name = document.getElementById('signup-name').value.trim();
-            const email = document.getElementById('signup-email').value.trim();
-            const password = document.getElementById('signup-password').value.trim();
-
-            if (name === '' || email === '' || password === '') {
-                alert('Semua field harus diisi!');
-                return;
-            }
-
-            if (password.length < 6) {
-                alert('Kata sandi minimal 6 karakter');
-                return;
-            }
-
-            if (!isGmail(email)) {
-                alert('❌ Hanya akun Google (@gmail.com) yang diizinkan untuk mendaftar!');
-                return;
-            }
-
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            if (users.some(user => user.email.toLowerCase() === email.toLowerCase())) {
-                alert('Email sudah terdaftar!');
-                return;
-            }
-
-            const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            console.log(`[DEBUG] OTP untuk pendaftaran ${email}: ${otp}`);
-
-            sessionStorage.setItem('pendingSignup', JSON.stringify({ name, email, password }));
-            sessionStorage.setItem('expectedOtp', otp);
-
-            signupForm.style.display = 'none';
-            loginForm.style.display = 'none';
-            otpForm.style.display = 'block';
-            document.getElementById('otp-instruction').textContent =
-                `Kode verifikasi untuk ${email} adalah: ${otp} (simulasi)`;
-
-            document.getElementById('otp-code').focus();
-        });
-
-        // Handle login
-        loginBtn.addEventListener('click', () => {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value.trim();
-
-            if (email === '' || password === '') {
-                alert('Email dan kata sandi harus diisi!');
-                return;
-            }
-
-            if (!isGmail(email)) {
-                alert('❌ Hanya akun Google (@gmail.com) yang diizinkan untuk login!');
-                return;
-            }
-
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const user = users.find(u =>
-                u.email.toLowerCase() === email.toLowerCase() &&
-                u.password === password
-            );
-
-            if (!user) {
-                const isRegistered = users.some(u => u.email.toLowerCase() === email.toLowerCase());
-                if (!isRegistered) {
-                    alert('❌ Akun tidak ditemukan! Hanya akun Google yang terdaftar.');
-                } else {
-                    alert('🔒 Kata sandi salah!');
-                }
-                return;
-            }
-
-            const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            console.log(`[DEBUG] OTP untuk ${email}: ${otp}`);
-
-            sessionStorage.setItem('pendingUser', JSON.stringify({ name: user.name, email: user.email }));
-            sessionStorage.setItem('expectedOtp', otp);
-
-            loginForm.style.display = 'none';
-            signupForm.style.display = 'none';
-            otpForm.style.display = 'block';
-            document.getElementById('otp-instruction').textContent =
-                `Kode verifikasi untuk ${user.email} adalah: ${otp} (simulasi)`;
-
-            document.getElementById('otp-code').focus();
-        });
-
-        // Handle OTP verification
-        verifyOtpBtn.addEventListener('click', () => {
-            const inputOtp = document.getElementById('otp-code').value.trim();
-            const expectedOtp = sessionStorage.getItem('expectedOtp');
-            const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser'));
-            const pendingSignup = JSON.parse(sessionStorage.getItem('pendingSignup'));
-
-            const statusEl = document.getElementById('otp-status');
-            statusEl.style.display = 'block';
-
-            if (inputOtp === expectedOtp) {
-                statusEl.className = 'email-status available';
-                statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Verifikasi berhasil!';
-
-                setTimeout(() => {
-                    sessionStorage.removeItem('expectedOtp');
-
-                    if (pendingSignup) {
-                        const users = JSON.parse(localStorage.getItem('users')) || [];
-                        users.push(pendingSignup);
-                        localStorage.setItem('users', JSON.stringify(users));
-                        localStorage.setItem('currentUser', JSON.stringify({
-                            name: pendingSignup.name,
-                            email: pendingSignup.email
-                        }));
-                        sessionStorage.removeItem('pendingSignup');
-                        showApp(
-                            pendingSignup.name.charAt(0).toUpperCase(),
-                            pendingSignup.name,
-                            pendingSignup.email
-                        );
-                    } else if (pendingUser) {
-                        localStorage.setItem('currentUser', JSON.stringify(pendingUser));
-                        sessionStorage.removeItem('pendingUser');
-                        showApp(
-                            pendingUser.name.charAt(0).toUpperCase(),
-                            pendingUser.name,
-                            pendingUser.email
-                        );
-                    }
-
-                    resetForms();
-                    loadMatches();
-                }, 800);
-            } else {
-                statusEl.className = 'email-status taken';
-                statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Kode salah! Coba lagi.';
-                document.getElementById('otp-code').value = '';
-                document.getElementById('otp-code').focus();
-            }
-        });
-
-        // Tombol kembali ke login dari OTP
-        backToLoginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            sessionStorage.removeItem('pendingUser');
-            sessionStorage.removeItem('pendingSignup');
-            sessionStorage.removeItem('expectedOtp');
-            otpForm.style.display = 'none';
-            loginForm.style.display = 'block';
-        });
-
-        // Navigation
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const target = e.target.dataset.page;
-
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-
-                pages.forEach(page => {
-                    page.classList.remove('active');
-                    page.style.display = 'none';
-                });
-                const targetPage = document.getElementById(`${target}-page`);
-                targetPage.classList.add('active');
-                targetPage.style.display = 'block';
-            });
-        });
-
-        // Logout
-        logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('currentUser');
-            sessionStorage.clear();
-            appContainer.style.display = 'none';
-            authContainer.style.display = 'flex';
-            resetForms();
-            navLinks[0].click();
-        });
-
-        // Show app
-        function showApp(initial, name, email) {
-            userDisplay.textContent = initial;
-            document.getElementById('profile-avatar').textContent = initial;
-            document.getElementById('profile-name').textContent = name;
-            document.getElementById('profile-email').textContent = email;
-
-            authContainer.style.opacity = '0';
-            authContainer.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                authContainer.style.display = 'none';
-                appContainer.style.display = 'flex';
-                loadMatches();
-            }, 300);
-        }
-
-        function resetForms() {
-            document.getElementById('login-email').value = '';
-            document.getElementById('login-password').value = '';
-            document.getElementById('signup-name').value = '';
-            document.getElementById('signup-email').value = '';
-            document.getElementById('signup-password').value = '';
-            document.getElementById('otp-code').value = '';
-            document.getElementById('login-email-status').style.display = 'none';
-            document.getElementById('signup-email-status').style.display = 'none';
-            document.getElementById('otp-status').style.display = 'none';
-        }
-
-        // ✅ loadMatches with chess & new layout
-        function loadMatches() {
-            liveMatchesContainer.innerHTML = '';
-
-            const mockLiveMatches = [
-                {
-                    home: "Manchester United",
-                    away: "Liverpool",
-                    homeScore: 2,
-                    awayScore: 1,
-                    time: "68'",
-                    live: true,
-                    sport: "football"
+            // ✅ Utilities
+            const Utils = {
+                isGmail(email) {
+                    return typeof email === 'string' && email.toLowerCase().endsWith('@gmail.com');
                 },
-                {
-                    home: "Real Madrid",
-                    away: "Barcelona",
-                    homeScore: 1,
-                    awayScore: 3,
-                    time: "82'",
-                    live: true,
-                    sport: "football"
-                },
-                {
-                    home: "Lakers",
-                    away: "Warriors",
-                    homeScore: 94,
-                    awayScore: 98,
-                    time: "Q4 2:18",
-                    live: true,
-                    sport: "basketball"
-                },
-                {
-                    home: "Yankees",
-                    away: "Red Sox",
-                    homeScore: 6,
-                    awayScore: 4,
-                    time: "8th",
-                    live: true,
-                    sport: "baseball"
-                },
-                {
-                    home: "Djokovic",
-                    away: "Alcaraz",
-                    homeScore: 2,
-                    awayScore: 1,
-                    time: "4th Set",
-                    live: true,
-                    sport: "tennis"
-                },
-                {
-                    home: "Magnus Carlsen",
-                    away: "Hikaru Nakamura",
-                    time: "Move 42",
-                    turn: "Black to move",
-                    live: true,
-                    sport: "chess"
-                },
-                {
-                    home: "Juventus",
-                    away: "AC Milan",
-                    homeScore: 0,
-                    awayScore: 0,
-                    time: "12'",
-                    live: true,
-                    sport: "football"
-                }
-            ];
 
-            mockLiveMatches.forEach(match => {
-                const card = document.createElement("div");
-                card.className = `match-card ${match.live ? 'live' : ''}`;
+                debounce(func, delay) {
+                    return function(...args) {
+                        clearTimeout(emailCheckTimeout);
+                        emailCheckTimeout = setTimeout(() => func.apply(this, args), delay);
+                    };
+                },
 
-                let leftContent, centerContent, rightContent;
+                generateOTP() {
+                    return Math.floor(100000 + Math.random() * 900000).toString();
+                },
 
-                if (match.sport === "chess") {
-                    leftContent = `<span class="team chess">${match.home}</span>`;
-                    rightContent = `<span class="team chess">${match.away}</span>`;
-                    centerContent = `
-                        <div class="chess-info">
-                            <div class="time">${match.time}</div>
-                            <div class="turn">${match.turn}</div>
-                        </div>
+                showToast(message, type = 'info', duration = 5000) {
+                    const toast = document.createElement('div');
+                    toast.className = `toast ${type}`;
+                    toast.innerHTML = `
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                         type === 'error' ? 'times-circle' : 
+                         type === 'warning' ? 'exclamation-triangle' : 
+                         type === 'daily' ? 'sync-alt' : 'info-circle'}"></i>
+                        <span>${message}</span>
                     `;
-                } else {
-                    leftContent = `<span class="score home-score">${match.homeScore}</span>`;
-                    rightContent = `<span class="score away-score">${match.awayScore}</span>`;
-                    centerContent = `<span class="time">${match.time}</span>`;
+                    DOM.notificationContainer.appendChild(toast);
+
+                    setTimeout(() => {
+                        toast.style.animation = 'fadeOutLong 0.5s forwards';
+                        setTimeout(() => {
+                            if (toast.parentNode) toast.remove();
+                        }, 500);
+                    }, duration);
+                },
+
+                setButtonLoading(btn, loading = true) {
+                    if (loading) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="loader"></span> Memproses...';
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = btn.dataset.defaultText || 'Submit';
+                    }
                 }
+            };
 
-                card.innerHTML = `
-                    <div class="match-content">
-                        <div class="match-side left">${leftContent}</div>
-                        <div class="match-center">${centerContent}</div>
-                        <div class="match-side right">${rightContent}</div>
-                    </div>
-                    <div class="match-teams">
-                        <span class="team home">${match.home}</span>
-                        <span class="vs">–</span>
-                        <span class="team away">${match.away}</span>
-                    </div>
-                `;
+            // 🗃️ Storage Controller
+            const Storage = {
+                getUsers() {
+                    return JSON.parse(localStorage.getItem('users') || '[]');
+                },
 
-                liveMatchesContainer.appendChild(card);
-            });
-        }
+                saveUsers(users) {
+                    localStorage.setItem('users', JSON.stringify(users));
+                },
 
-        // Check login on load
+                getCurrentUser() {
+                    return JSON.parse(localStorage.getItem('currentUser') || 'null');
+                },
+
+                saveCurrentUser(user) {
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                },
+
+                removeCurrentUser() {
+                    localStorage.removeItem('currentUser');
+                },
+
+                getLastDailyUpdate() {
+                    return localStorage.getItem('lastDailyUpdate');
+                },
+
+                setLastDailyUpdate() {
+                    localStorage.setItem('lastDailyUpdate', Date.now().toString());
+                }
+            };
+
+            // 🔐 Auth Controller
+            const Auth = {
+                init() {
+                    // Setup demo users
+                    if (Storage.getUsers().length === 0) {
+                        Storage.saveUsers([
+                            { name: "Admin ScoreMatch", email: "admin@gmail.com", password: "admin123" },
+                            { name: "User Demo", email: "user@gmail.com", password: "user123" }
+                        ]);
+                    }
+
+                    // Event Listeners
+                    DOM.showSignupBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        DOM.loginForm.classList.add('hidden');
+                        DOM.signupForm.classList.remove('hidden');
+                        DOM.otpForm.classList.add('hidden');
+                        DOM.loginEmailStatus.classList.add('hidden');
+                    });
+
+                    DOM.showLoginBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        DOM.signupForm.classList.add('hidden');
+                        DOM.loginForm.classList.remove('hidden');
+                        DOM.otpForm.classList.add('hidden');
+                        DOM.signupEmailStatus.classList.add('hidden');
+                    });
+
+                    DOM.backToLoginBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        sessionStorage.clear();
+                        DOM.otpForm.classList.add('hidden');
+                        DOM.loginForm.classList.remove('hidden');
+                    });
+
+                    DOM.loginBtn.addEventListener('click', this.handleLogin);
+                    DOM.signupBtn.addEventListener('click', this.handleSignup);
+                    DOM.verifyOtpBtn.addEventListener('click', this.handleOTPVerify);
+                    DOM.logoutBtn.addEventListener('click', this.handleLogout);
+
+                    // Email input listeners
+                    DOM.loginEmail.addEventListener('input', Utils.debounce(() => {
+                        this.checkEmail(DOM.loginEmail.value.trim(), true);
+                    }, 500));
+                    DOM.signupEmail.addEventListener('input', Utils.debounce(() => {
+                        this.checkEmail(DOM.signupEmail.value.trim(), false);
+                    }, 500));
+
+                    // Force daily update (debug)
+                    DOM.forceDailyUpdateBtn?.addEventListener('click', () => {
+                        localStorage.removeItem('lastDailyUpdate');
+                        DailyUpdate.perform();
+                        Utils.showToast('✅ Daily update dipaksa dijalankan!', 'daily');
+                    });
+                },
+
+                get loginEmailStatus() {
+                    return document.getElementById('login-email-status');
+                },
+                get signupEmailStatus() {
+                    return document.getElementById('signup-email-status');
+                },
+                get otpStatus() {
+                    return document.getElementById('otp-status');
+                },
+
+                checkEmail(email, isLogin) {
+                    const statusEl = isLogin ? this.loginEmailStatus : this.signupEmailStatus;
+                    if (!email || email.length < 5) {
+                        statusEl.classList.add('hidden');
+                        return;
+                    }
+
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    const isValid = emailRegex.test(email);
+                    const isGoogle = Utils.isGmail(email);
+
+                    statusEl.classList.remove('hidden');
+                    statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memeriksa...';
+
+                    if (!isValid) {
+                        statusEl.className = 'email-status warning';
+                        statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Format email tidak valid';
+                        return;
+                    }
+
+                    if (!isGoogle) {
+                        statusEl.className = 'email-status warning';
+                        statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Hanya @gmail.com yang diizinkan!';
+                        return;
+                    }
+
+                    // Simulate API check
+                    setTimeout(() => {
+                        const users = Storage.getUsers();
+                        const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+
+                        if (isLogin) {
+                            if (exists) {
+                                statusEl.className = 'email-status available';
+                                statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Akun Google ditemukan';
+                            } else {
+                                statusEl.className = 'email-status taken';
+                                statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Akun tidak terdaftar';
+                            }
+                        } else {
+                            if (exists) {
+                                statusEl.className = 'email-status taken';
+                                statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Email sudah terdaftar';
+                            } else {
+                                statusEl.className = 'email-status available';
+                                statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Email tersedia';
+                            }
+                        }
+                    }, 300);
+                },
+
+                handleLogin() {
+                    const email = DOM.loginEmail.value.trim();
+                    const password = DOM.loginPassword.value.trim();
+
+                    if (!email || !password) {
+                        Utils.showToast('❌ Email dan password wajib diisi', 'error');
+                        return;
+                    }
+
+                    if (!Utils.isGmail(email)) {
+                        Utils.showToast('❌ Hanya akun @gmail.com yang diizinkan', 'error');
+                        return;
+                    }
+
+                    const users = Storage.getUsers();
+                    const user = users.find(u => 
+                        u.email.toLowerCase() === email.toLowerCase() && 
+                        u.password === password
+                    );
+
+                    if (!user) {
+                        const registered = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+                        Utils.showToast(registered ? '❌ Password salah!' : '❌ Akun tidak ditemukan', 'error');
+                        return;
+                    }
+
+                    // Simulate OTP
+                    const otp = Utils.generateOTP();
+                    console.log(`[DEBUG] OTP untuk ${email}: ${otp}`);
+                    sessionStorage.setItem('pendingUser', JSON.stringify({ name: user.name, email: user.email }));
+                    sessionStorage.setItem('expectedOtp', otp);
+
+                    DOM.loginForm.classList.add('hidden');
+                    DOM.otpForm.classList.remove('hidden');
+                    document.getElementById('otp-instruction').textContent = `Kode verifikasi untuk ${user.email}: ${otp} (simulasi)`;
+                    DOM.otpCode.value = '';
+                    DOM.otpCode.focus();
+                },
+
+                handleSignup() {
+                    const name = DOM.signupName.value.trim();
+                    const email = DOM.signupEmail.value.trim();
+                    const password = DOM.signupPassword.value.trim();
+
+                    if (!name || !email || !password) {
+                        Utils.showToast('❌ Semua field wajib diisi', 'error');
+                        return;
+                    }
+
+                    if (password.length < 6) {
+                        Utils.showToast('⚠️ Password minimal 6 karakter', 'warning');
+                        return;
+                    }
+
+                    if (!Utils.isGmail(email)) {
+                        Utils.showToast('❌ Hanya @gmail.com yang diizinkan', 'error');
+                        return;
+                    }
+
+                    const users = Storage.getUsers();
+                    if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+                        Utils.showToast('❌ Email sudah terdaftar!', 'error');
+                        return;
+                    }
+
+                    const otp = Utils.generateOTP();
+                    console.log(`[DEBUG] OTP untuk daftar ${email}: ${otp}`);
+                    sessionStorage.setItem('pendingSignup', JSON.stringify({ name, email, password }));
+                    sessionStorage.setItem('expectedOtp', otp);
+
+                    DOM.signupForm.classList.add('hidden');
+                    DOM.otpForm.classList.remove('hidden');
+                    document.getElementById('otp-instruction').textContent = `Kode verifikasi untuk ${email}: ${otp} (simulasi)`;
+                    DOM.otpCode.value = '';
+                    DOM.otpCode.focus();
+                },
+
+                handleOTPVerify() {
+                    const inputOtp = DOM.otpCode.value.trim();
+                    const expectedOtp = sessionStorage.getItem('expectedOtp');
+                    const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser') || 'null');
+                    const pendingSignup = JSON.parse(sessionStorage.getItem('pendingSignup') || 'null');
+
+                    if (!expectedOtp) {
+                        Utils.showToast('⏳ Sesi kadaluarsa. Silakan login ulang.', 'error');
+                        return;
+                    }
+
+                    if (inputOtp !== expectedOtp) {
+                        Utils.showToast('❌ Kode OTP salah! Coba lagi.', 'error');
+                        DOM.otpCode.value = '';
+                        DOM.otpCode.focus();
+                        return;
+                    }
+
+                    // Success
+                    let user;
+                    if (pendingSignup) {
+                        const users = Storage.getUsers();
+                        users.push(pendingSignup);
+                        Storage.saveUsers(users);
+                        user = { name: pendingSignup.name, email: pendingSignup.email };
+                        sessionStorage.removeItem('pendingSignup');
+                    } else if (pendingUser) {
+                        user = pendingUser;
+                        sessionStorage.removeItem('pendingUser');
+                    }
+
+                    Storage.saveCurrentUser(user);
+                    App.show(user);
+                    sessionStorage.removeItem('expectedOtp');
+                    Utils.showToast('✅ Login berhasil!', 'success');
+                },
+
+                handleLogout() {
+                    Storage.removeCurrentUser();
+                    sessionStorage.clear();
+                    DOM.appContainer.classList.add('hidden');
+                    DOM.authContainer.classList.remove('hidden');
+                    DOM.authContainer.style.opacity = '1';
+                    DOM.loginEmail.value = '';
+                    DOM.loginPassword.value = '';
+                    DOM.navLinks[0].click(); // Reset nav
+                }
+            };
+
+            // 📅 Daily Update Module
+            const DailyUpdate = {
+                perform() {
+                    const now = Date.now();
+                    const lastUpdate = Storage.getLastDailyUpdate();
+                    const twentyFourHours = 24 * 60 * 60 * 1000;
+
+                    const liveCount = document.querySelectorAll('.match-card.live').length;
+                    if (liveCount === 0) return; // Skip if no live matches
+
+                    if (!lastUpdate || (now - parseInt(lastUpdate)) >= twentyFourHours) {
+                        const msg = `📈 Update harian: ${liveCount} pertandingan live hari ini!`;
+                        Utils.showToast(msg, 'daily', 6000);
+                        Storage.setLastDailyUpdate();
+                        console.log('[DAILY UPDATE]', msg);
+                    }
+                }
+            };
+
+            // 🎮 App Controller
+            const App = {
+                init() {
+                    // Navigation
+                    DOM.navLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const target = e.target.dataset.page;
+
+                            DOM.navLinks.forEach(l => l.classList.remove('active'));
+                            link.classList.add('active');
+
+                            DOM.pages.forEach(page => page.classList.add('hidden'));
+                            document.getElementById(`${target}-page`).classList.remove('hidden');
+                        });
+                    });
+
+                    // Auto-refresh
+                    setInterval(() => {
+                        if (DOM.appContainer.classList.contains('hidden') === false) {
+                            this.loadMatches();
+                        }
+                    }, 30000);
+
+                    // Check login on load
+                    const currentUser = Storage.getCurrentUser();
+                    if (currentUser) {
+                        this.show(currentUser);
+                    }
+                },
+
+                show(user) {
+                    const initial = user.name.charAt(0).toUpperCase();
+                    DOM.userDisplay.textContent = initial;
+                    DOM.profileAvatar.textContent = initial;
+                    DOM.profileName.textContent = user.name;
+                    DOM.profileEmail.textContent = user.email;
+                    DOM.profileNameDisplay.textContent = user.name;
+
+                    DOM.authContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        DOM.authContainer.classList.add('hidden');
+                        DOM.appContainer.classList.remove('hidden');
+                        this.loadMatches();
+                    }, 300);
+                },
+
+                loadMatches() {
+                    DOM.liveMatchesContainer.innerHTML = '';
+
+                    const matches = [
+                        { home: "Manchester United", away: "Liverpool", homeScore: 2, awayScore: 1, time: "68'", live: true, sport: "football" },
+                        { home: "Real Madrid", away: "Barcelona", homeScore: 1, awayScore: 3, time: "82'", live: true, sport: "football" },
+                        { home: "Lakers", away: "Warriors", homeScore: 94, awayScore: 98, time: "Q4 2:18", live: true, sport: "basketball" },
+                        { home: "Magnus Carlsen", away: "Hikaru Nakamura", time: "Move 42", turn: "Black to move", live: true, sport: "chess" },
+                        { home: "Djokovic", away: "Alcaraz", homeScore: 2, awayScore: 1, time: "4th Set", live: true, sport: "tennis" }
+                    ];
+
+                    matches.forEach(match => {
+                        const card = document.createElement('div');
+                        card.className = `match-card ${match.live ? 'live' : ''}`;
+
+                        let left, center, right;
+                        if (match.sport === 'chess') {
+                            left = `<span class="team chess">${match.home}</span>`;
+                            right = `<span class="team chess">${match.away}</span>`;
+                            center = `
+                                <div class="chess-info">
+                                    <div class="time">${match.time}</div>
+                                    <div class="turn">${match.turn}</div>
+                                </div>
+                            `;
+                        } else {
+                            left = `<span class="score home-score">${match.homeScore}</span>`;
+                            right = `<span class="score away-score">${match.awayScore}</span>`;
+                            center = `<span class="time">${match.time}</span>`;
+                        }
+
+                        card.innerHTML = `
+                            <div class="match-content">
+                                <div class="match-side left">${left}</div>
+                                <div class="match-center">${center}</div>
+                                <div class="match-side right">${right}</div>
+                            </div>
+                            <div class="match-teams">
+                                <span class="team home">${match.home}</span>
+                                <span class="vs">–</span>
+                                <span class="team away">${match.away}</span>
+                            </div>
+                        `;
+                        DOM.liveMatchesContainer.appendChild(card);
+                    });
+
+                    // 🔁 Trigger daily update check
+                    DailyUpdate.perform();
+                }
+            };
+
+            // 🚀 Public API
+            return {
+                init() {
+                    Auth.init();
+                    App.init();
+                    Utils.showToast('👋 Selamat datang di ScoreMatch!', 'info', 3000);
+                }
+            };
+        })();
+
+        // 🧪 Run on DOM load
         document.addEventListener('DOMContentLoaded', () => {
-            const currentUser = localStorage.getItem('currentUser');
-            if (currentUser) {
-                const user = JSON.parse(currentUser);
-                showApp(user.name.charAt(0).toUpperCase(), user.name, user.email);
-                loadMatches();
-            } else {
-                authContainer.style.display = 'flex';
-            }
+            ScoreMatch.init();
         });
-
-        // Auto-refresh
-        setInterval(() => {
-            if (appContainer.style.display === 'flex') {
-                loadMatches();
-            }
-        }, 30000);
     </script>
 </body>
 </html>
-
