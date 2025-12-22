@@ -4,166 +4,525 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScoreMatch — Live Sports & Chess</title>
-    <!-- 🔗 Font Awesome 6.5.0 (CDN) -->
+
+    <!-- 🔖 FAVICON: Icon Tab Browser (Base64 - No External File!) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🏆</text></svg>">
+    <!-- Fallback untuk browser lama -->
+    <link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER......">
+    <meta name="theme-color" content="#3b82f6">
+
+    <!-- 🔗 Font Awesome 6.5.0 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- 🎨 CSS Terpisah -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ========== GLOBAL ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-alt: #1e2a38;
+            --border: #334155;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #065f46;
+            --success-light: #bbf7d0;
+            --danger: #7f1d1d;
+            --danger-light: #fecaca;
+            --warning: #7c2d12;
+            --warning-light: #fed7aa;
+            --live-indicator: #ff4d6d;
+            --chess-time: #1d4ed8;
+            --turn-yellow: #fbbf24;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .fade-out { animation: fadeOut 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ========== AUTH ========== */
+        #auth-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity 0.4s, transform 0.4s;
+        }
+
+        .auth-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .auth-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .auth-box h2 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+        .prefix-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, background 0.2s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-warning {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .switch-form a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .email-status {
+            margin-top: 6px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .email-status.checking { background: var(--border); color: #cbd5e1; }
+        .email-status.available { background: var(--success); color: var(--success-light); }
+        .email-status.taken { background: var(--danger); color: var(--danger-light); }
+        .email-status.warning { background: var(--warning); color: var(--warning-light); }
+
+        /* ========== APP ========== */
+        #app-container {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: white;
+            background: var(--border);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        #user-display {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        main {
+            flex: 1;
+            padding: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .greeting {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            color: #f87171;
+            font-weight: 600;
+        }
+
+        /* ========== MATCH CARDS ========== */
+        #live-matches {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .match-card {
+            background: var(--card-alt);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .match-card:hover {
+            transform: translateY(-2px);
+        }
+        .match-card.live::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--live-indicator);
+            animation: pulse 2s infinite;
+        }
+
+        .match-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .match-side {
+            flex: 1;
+            text-align: left;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+        .match-side.right {
+            text-align: right;
+        }
+
+        .match-center {
+            flex: 1.2;
+            text-align: center;
+        }
+
+        .time {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .score {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+        .home-score { color: #60a5fa; }
+        .away-score { color: #f87171; }
+
+        .match-teams {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+        .match-teams .vs {
+            color: var(--text-muted);
+            margin: 0 6px;
+        }
+
+        .chess-info .time {
+            background: var(--chess-time);
+            color: white;
+        }
+        .chess-info .turn {
+            font-size: 0.85rem;
+            color: var(--turn-yellow);
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .nav-links { display: none; }
+            main { padding: 16px; }
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .profile-actions {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- 🔔 Notification Container (Dynamic) -->
-    <div id="notification-container"></div>
-
-    <!-- 🔐 Authentication Screens -->
+    <!-- 🔐 Auth Container -->
     <div id="auth-container">
         <div class="auth-box">
-            <h2><i class="fas fa-lock fa-lg" style="color:#60a5fa;"></i> Login ke ScoreMatch</h2>
+            <h2><i class="fas fa-lock"></i> Login ke ScoreMatch</h2>
 
-            <!-- Login Form -->
             <form id="login-form">
                 <div class="form-group">
-                    <label for="login-email">
-                        <i class="fas fa-envelope"></i> Email (Google only)
-                    </label>
+                    <label><i class="fas fa-envelope"></i> Email (Google only)</label>
                     <div class="input-with-icon">
                         <i class="fas fa-at prefix-icon"></i>
-                        <input type="email" id="login-email" placeholder="contoh@gmail.com" autocomplete="off">
+                        <input type="email" id="login-email" placeholder="contoh@gmail.com">
                     </div>
                     <div id="login-email-status" class="email-status hidden"></div>
                 </div>
                 <div class="form-group">
-                    <label for="login-password">
-                        <i class="fas fa-key"></i> Password
-                    </label>
+                    <label><i class="fas fa-key"></i> Password</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock prefix-icon"></i>
                         <input type="password" id="login-password" placeholder="••••••••">
                     </div>
                 </div>
-                <button type="button" id="login-btn" class="btn btn-primary">
-                    <i class="fas fa-sign-in-alt"></i> Masuk ke Dashboard
+                <button type="button" id="login-btn" class="btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Masuk
                 </button>
                 <div class="switch-form">
                     Belum punya akun? <a href="#" id="show-signup"><i class="fas fa-user-plus"></i> Daftar Sekarang</a>
                 </div>
             </form>
 
-            <!-- Signup Form -->
             <form id="signup-form" class="hidden">
                 <div class="form-group">
-                    <label for="signup-name">
-                        <i class="fas fa-user"></i> Nama Lengkap
-                    </label>
+                    <label><i class="fas fa-user"></i> Nama Lengkap</label>
                     <div class="input-with-icon">
                         <i class="fas fa-signature prefix-icon"></i>
                         <input type="text" id="signup-name" placeholder="John Doe">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="signup-email">
-                        <i class="fas fa-envelope"></i> Email (@gmail.com only)
-                    </label>
+                    <label><i class="fas fa-google"></i> Email (@gmail.com)</label>
                     <div class="input-with-icon">
-                        <i class="fas fa-google prefix-icon" style="color:#DB4437;"></i>
+                        <i class="fab fa-google prefix-icon" style="color:#DB4437;"></i>
                         <input type="email" id="signup-email" placeholder="john@gmail.com">
                     </div>
                     <div id="signup-email-status" class="email-status hidden"></div>
                 </div>
                 <div class="form-group">
-                    <label for="signup-password">
-                        <i class="fas fa-shield-alt"></i> Password
-                    </label>
+                    <label><i class="fas fa-shield-alt"></i> Password</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock prefix-icon"></i>
                         <input type="password" id="signup-password" placeholder="Minimal 6 karakter">
                     </div>
                 </div>
-                <button type="button" id="signup-btn" class="btn btn-primary">
-                    <i class="fas fa-user-check"></i> Daftar Akun
+                <button type="button" id="signup-btn" class="btn-primary">
+                    <i class="fas fa-user-check"></i> Daftar
                 </button>
                 <div class="switch-form">
-                    Sudah punya akun? <a href="#" id="show-login"><i class="fas fa-sign-in-alt"></i> Login di sini</a>
+                    Sudah punya akun? <a href="#" id="show-login"><i class="fas fa-sign-in-alt"></i> Login</a>
                 </div>
             </form>
 
-            <!-- OTP Form -->
             <form id="otp-form" class="hidden">
-                <p id="otp-instruction" style="text-align:center; margin-bottom:16px; color:var(--text-muted);">
+                <p style="text-align:center; margin-bottom:16px; color:var(--text-muted);">
                     <i class="fas fa-shield-check" style="color:#10b981;"></i> Verifikasi Keamanan
                 </p>
                 <div class="form-group">
-                    <label for="otp-code">
-                        <i class="fas fa-key"></i> Kode Verifikasi (6 digit)
-                    </label>
-                    <div class="input-with-icon otp-input">
+                    <label><i class="fas fa-key"></i> Kode OTP (6 digit)</label>
+                    <div class="input-with-icon">
                         <i class="fas fa-hashtag prefix-icon"></i>
-                        <input type="text" id="otp-code" placeholder="______" maxlength="6" inputmode="numeric">
+                        <input type="text" id="otp-code" placeholder="______" maxlength="6" inputmode="numeric" style="text-align:center; font-size:1.4rem; letter-spacing:8px;">
                     </div>
                     <div id="otp-status" class="email-status hidden"></div>
                 </div>
-                <button type="button" id="verify-otp-btn" class="btn btn-primary">
-                    <i class="fas fa-paper-plane"></i> Kirim & Verifikasi
+                <button type="button" id="verify-otp-btn" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Verifikasi
                 </button>
                 <div class="switch-form">
-                    <a href="#" id="back-to-login"><i class="fas fa-arrow-left"></i> Kembali ke Login</a>
+                    <a href="#" id="back-to-login"><i class="fas fa-arrow-left"></i> Kembali</a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- 🎮 App Dashboard -->
+    <!-- 🎮 App Container -->
     <div id="app-container" class="hidden">
         <header>
-            <div class="logo">
-                <i class="fas fa-trophy" style="color:#fbbf24;"></i> 
-                <span>ScoreMatch</span>
-            </div>
+            <div class="logo"><i class="fas fa-trophy"></i> ScoreMatch</div>
             <nav class="nav-links">
-                <a href="#" class="nav-link active" data-page="dashboard">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-                <a href="#" class="nav-link" data-page="live">
-                    <i class="fas fa-fire"></i> Live Score
-                </a>
-                <a href="#" class="nav-link" data-page="profile">
-                    <i class="fas fa-user-circle"></i> Profil
-                </a>
+                <a href="#" class="nav-link active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="#" class="nav-link" data-page="live"><i class="fas fa-fire"></i> Live</a>
+                <a href="#" class="nav-link" data-page="profile"><i class="fas fa-user-circle"></i> Profil</a>
             </nav>
             <div class="user-actions">
-                <button class="notification-btn" id="bell-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge" id="notif-badge">3</span>
-                </button>
+                <button class="notification-btn"><i class="fas fa-bell"></i></button>
                 <div id="user-display">A</div>
             </div>
         </header>
 
         <main>
             <div id="dashboard-page" class="page active">
-                <h2 class="greeting">
-                    <i class="fas fa-hand-wave"></i> Halo, <span id="profile-name-display">User</span>!
-                </h2>
+                <h2 class="greeting"><i class="fas fa-hand-wave"></i> Halo, <span id="profile-name-display">User</span>!</h2>
 
                 <div class="section-title">
-                    <i class="fas fa-signal" style="color:#ff4d6d;"></i> 🔴 LIVE MATCHES SAAT INI
+                    <i class="fas fa-signal" style="color:#ff4d6d;"></i> 🔴 LIVE MATCHES
                 </div>
 
                 <div id="live-matches">
-                    <!-- Match cards will be injected here -->
-                </div>
-            </div>
-
-            <div id="live-page" class="page hidden">
-                <h2><i class="fas fa-tv"></i> Live Score Updates</h2>
-                <p>Semua pertandingan real-time ada di halaman Dashboard.</p>
-                <div style="margin-top:20px; padding:16px; background:var(--bg-tertiary); border-radius:var(--radius-lg);">
-                    <h3><i class="fas fa-info-circle"></i> Panduan</h3>
-                    <ul style="margin-top:10px; padding-left:20px;">
-                        <li><i class="fas fa-futbol"></i> Sepak Bola: Skor & menit</li>
-                        <li><i class="fas fa-chess-knight"></i> Catur: Giliran & langkah</li>
-                        <li><i class="fas fa-basketball-ball"></i> Basket: Quarter & waktu</li>
-                        <li><i class="fas fa-sync-alt"></i> Data diperbarui tiap 30 detik</li>
-                    </ul>
+                    <!-- Matches injected by JS -->
                 </div>
             </div>
 
@@ -171,41 +530,15 @@
                 <h2><i class="fas fa-user-cog"></i> Profil Pengguna</h2>
                 <div class="profile-card">
                     <div class="profile-header">
-                        <div id="profile-avatar" class="avatar">A</div>
-                        <div class="profile-info">
-                            <div id="profile-name" class="profile-name">User Name</div>
-                            <div id="profile-email" class="profile-email">user@gmail.com</div>
-                            <div class="profile-status">
-                                <i class="fas fa-circle" style="color:#10b981; font-size:0.6em;"></i>
-                                <span>Online • Terakhir login: Hari ini</span>
-                            </div>
+                        <div class="avatar" id="profile-avatar">A</div>
+                        <div>
+                            <div id="profile-name" style="font-size:1.3rem;">User Name</div>
+                            <div id="profile-email" style="color:var(--text-muted);">user@gmail.com</div>
                         </div>
                     </div>
-
-                    <div class="profile-stats">
-                        <div class="stat-item">
-                            <i class="fas fa-futbol"></i>
-                            <span>12</span>
-                            <small>Pertandingan</small>
-                        </div>
-                        <div class="stat-item">
-                            <i class="fas fa-chess-board"></i>
-                            <span>5</span>
-                            <small>Catur</small>
-                        </div>
-                        <div class="stat-item">
-                            <i class="fas fa-bell"></i>
-                            <span>3</span>
-                            <small>Notifikasi</small>
-                        </div>
-                    </div>
-
                     <div class="profile-actions">
-                        <button id="logout-btn" class="btn btn-danger">
-                            <i class="fas fa-sign-out-alt"></i> Keluar dari Akun
-                        </button>
-                        <button id="force-daily-update" class="btn btn-warning">
-                            <i class="fas fa-sync-alt"></i> Force Daily Update
+                        <button id="logout-btn" class="btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> Keluar
                         </button>
                     </div>
                 </div>
@@ -213,7 +546,73 @@
         </main>
     </div>
 
-    <!-- 📦 Scripts -->
-    <script src="script.js"></script>
+    <script>
+        // Simple initialization to show favicon works
+        document.addEventListener('DOMContentLoaded', () => {
+            // Init demo users
+            if (!localStorage.getItem('users')) {
+                localStorage.setItem('users', JSON.stringify([
+                    { name: "Admin", email: "admin@gmail.com", password: "admin123" }
+                ]));
+            }
+
+            // Quick login for demo
+            document.getElementById('login-btn').onclick = () => {
+                const user = { name: "Pengguna", email: "user@gmail.com" };
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                document.getElementById('auth-container').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('auth-container').classList.add('hidden');
+                    document.getElementById('app-container').classList.remove('hidden');
+                    document.getElementById('profile-name-display').textContent = user.name;
+                    document.getElementById('profile-avatar').textContent = user.name.charAt(0).toUpperCase();
+                    loadMatches();
+                }, 300);
+            };
+
+            function loadMatches() {
+                const container = document.getElementById('live-matches');
+                container.innerHTML = `
+                    <div class="match-card live">
+                        <div class="match-content">
+                            <div class="match-side left"><span class="score home-score">2</span></div>
+                            <div class="match-center"><span class="time">68'</span></div>
+                            <div class="match-side right"><span class="score away-score">1</span></div>
+                        </div>
+                        <div class="match-teams">
+                            <span>Manchester Utd</span>
+                            <span class="vs">–</span>
+                            <span>Liverpool</span>
+                        </div>
+                    </div>
+                    <div class="match-card live">
+                        <div class="match-content">
+                            <div class="match-side left"><span class="team chess">Carlsen</span></div>
+                            <div class="match-center">
+                                <div class="chess-info">
+                                    <div class="time">Move 42</div>
+                                    <div class="turn">Black to move</div>
+                                </div>
+                            </div>
+                            <div class="match-side right"><span class="team chess">Nakamura</span></div>
+                        </div>
+                        <div class="match-teams">
+                            <span class="chess">Magnus Carlsen</span>
+                            <span class="vs">–</span>
+                            <span class="chess">Hikaru Nakamura</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('logout-btn').onclick = () => {
+                localStorage.removeItem('currentUser');
+                document.getElementById('app-container').classList.add('hidden');
+                document.getElementById('auth-container').classList.remove('hidden');
+                document.getElementById('auth-container').style.opacity = '1';
+            };
+        });
+    </script>
 </body>
 </html>
