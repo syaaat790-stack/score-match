@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoreMatch - Skor Olahraga Live</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Auth Container */
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .auth-header {
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+        }
+
+        .auth-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .auth-header p {
+            color: #94a3b8;
+            font-size: 1.05rem;
+        }
+
+        .auth-form {
+            padding: 35px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .auth-btn {
+            background: linear-gradient(to right, #0f172a, #1e3c72);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #64748b;
+        }
+
+        .auth-switch a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main App Styles */
+        #app-container {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: #0f172a;
+            padding: 0.8rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: #38bdf8;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #38bdf8, #818cf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1.2rem;
+        }
+
+        .nav-menu a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: white;
+            background-color: #334155;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .live-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .live-header h2 {
+            color: #dc2626;
+            margin-bottom: 0.4rem;
+            font-size: 1.8rem;
+        }
+
+        .live-header p {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .match-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .match-card.live {
+            border-left: 5px solid #ef4444;
+        }
+
+        .team {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1e293b;
+        }
+
+        .score {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0f172a;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            background-color: #0f172a;
+            color: #cbd5e1;
+            margin-top: 3rem;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(to right, #0f172a, #1e3c72);
+            color: white;
+            text-align: center;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .welcome-banner h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-banner p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .auth-container {
+                margin: 10px;
+            }
+
+            .auth-form {
+                padding: 25px 20px;
+            }
+
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .match-card {
+                flex-direction: column;
+                gap: 0.8rem;
+                text-align: center;
+            }
+
+            .score {
+                font-size: 1.8rem;
+            }
+
+            .welcome-banner h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div class="auth-container fade-in" id="auth-container">
+        <div class="auth-header">
+            <h1>⚽ ScoreMatch</h1>
+            <p>Skor Olahraga Real-Time</p>
+        </div>
+        <div class="auth-form">
+            <div id="login-form">
+                <h2 style="text-align: center; margin-bottom: 25px; color: #1e293b;">Masuk ke Akun</h2>
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="contoh@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Kata Sandi</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Minimal 6 karakter" required>
+                </div>
+                <button class="auth-btn" id="login-btn">Masuk</button>
+                <div class="auth-switch">
+                    <span>Belum punya akun?</span>
+                    <a href="#" id="show-signup">Daftar di sini</a>
+                </div>
+            </div>
+
+            <div id="signup-form" style="display: none;">
+                <h2 style="text-align: center; margin-bottom: 25px; color: #1e293b;">Buat Akun Baru</h2>
+                <div class="form-group">
+                    <label for="signup-name">Nama Lengkap</label>
+                    <input type="text" id="signup-name" class="form-control" placeholder="Nama Anda" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" class="form-control" placeholder="contoh@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Kata Sandi</label>
+                    <input type="password" id="signup-password" class="form-control" placeholder="Minimal 6 karakter" required>
+                </div>
+                <button class="auth-btn" id="signup-btn">Daftar</button>
+                <div class="auth-switch">
+                    <span>Sudah punya akun?</span>
+                    <a href="#" id="show-login">Masuk di sini</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div id="app-container">
+        <header>
+            <div class="header-container">
+                <div class="logo">
+                    ⚽ <span>ScoreMatch</span>
+                </div>
+                <div class="user-info">
+                    <div id="user-display" class="user-avatar">U</div>
+                    <button class="logout-btn" id="logout-btn">Keluar</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="welcome-banner fade-in delay-1">
+                <h1>Selamat Datang di ScoreMatch</h1>
+                <p>Lihat skor pertandingan olahraga secara real-time dari berbagai cabang olahraga</p>
+            </div>
+
+            <div class="live-header fade-in delay-2">
+                <h2>🔴 Pertandingan Sedang Berlangsung</h2>
+                <p>Perbarui otomatis setiap 30 detik</p>
+            </div>
+
+            <div id="live-matches" class="fade-in delay-3">
+                <!-- Data skor akan dimuat di sini -->
+            </div>
+        </main>
+
+        <footer class="fade-in delay-4">
+            <p>&copy; 2025 ScoreMatch. Semua hak dilindungi.</p>
+            <p>Data simulasi untuk keperluan demo</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const showSignupBtn = document.getElementById('show-signup');
+        const showLoginBtn = document.getElementById('show-login');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userDisplay = document.getElementById('user-display');
+        const liveMatchesContainer = document.getElementById('live-matches');
+
+        // Toggle between login and signup forms
+        showSignupBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'block';
+        });
+
+        showLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        });
+
+        // Initialize user database in localStorage if not exists
+        if (!localStorage.getItem('users')) {
+            localStorage.setItem('users', JSON.stringify([]));
+        }
+
+        // Handle signup
+        signupBtn.addEventListener('click', () => {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value.trim();
+
+            if (name === '' || email === '' || password === '') {
+                alert('Semua field harus diisi!');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Kata sandi minimal 6 karakter');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users'));
+
+            // Check if email already exists
+            if (users.some(user => user.email === email)) {
+                alert('Email sudah terdaftar!');
+                return;
+            }
+
+            // Add new user
+            users.push({ name, email, password });
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Set current user
+            localStorage.setItem('currentUser', JSON.stringify({ name, email }));
+
+            // Switch to app
+            showApp(name.charAt(0).toUpperCase());
+            resetForms();
+            loadMatches();
+        });
+
+        // Handle login
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            if (email === '' || password === '') {
+                alert('Email dan kata sandi harus diisi!');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users'));
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                // Set current user
+                localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email }));
+
+                // Switch to app
+                showApp(user.name.charAt(0).toUpperCase());
+                resetForms();
+                loadMatches();
+            } else {
+                alert('Email atau kata sandi salah!');
+            }
+        });
+
+        // Handle logout
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            appContainer.style.display = 'none';
+            authContainer.style.display = 'block';
+            authContainer.classList.add('fade-in');
+            appContainer.classList.remove('fade-in');
+        });
+
+        // Show application after login/signup
+        function showApp(initial) {
+            // Update user avatar
+            userDisplay.textContent = initial;
+
+            // Hide auth container with animation
+            authContainer.classList.remove('fade-in');
+            authContainer.style.opacity = '0';
+            authContainer.style.transform = 'translateY(20px)';
+
+            // Show app container after animation
+            setTimeout(() => {
+                authContainer.style.display = 'none';
+                appContainer.style.display = 'block';
+                appContainer.classList.add('fade-in');
+            }, 300);
+        }
+
+        // Reset forms after successful auth
+        function resetForms() {
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('signup-name').value = '';
+            document.getElementById('signup-email').value = '';
+            document.getElementById('signup-password').value = '';
+        }
+
+        // Mock data for live matches
+        const mockLiveMatches = [
+            { home: "Manchester United", away: "Liverpool", homeScore: 2, awayScore: 1, live: true },
+            { home: "Real Madrid", away: "Barcelona", homeScore: 0, awayScore: 2, live: true },
+            { home: "Lakers", away: "Warriors", homeScore: 89, awayScore: 92, live: true },
+            { home: "Yankees", away: "Red Sox", homeScore: 5, awayScore: 3, live: true },
+            { home: "Djokovic", away: "Alcaraz", homeScore: 1, awayScore: 1, live: true, sport: "tenis" },
+            { home: "Magnus Carlsen", away: "Ian Nepomniachtchi", homeScore: 1, awayScore: 0, live: true, sport: "catur", icon: "♔" }
+        ];
+
+        // Render matches to UI
+        function loadMatches() {
+            liveMatchesContainer.innerHTML = '';
+
+            if (mockLiveMatches.length === 0) {
+                liveMatchesContainer.innerHTML = "<p class='no-matches'>🎯 Tidak ada pertandingan live saat ini.</p>";
+                return;
+            }
+
+            mockLiveMatches.forEach(match => {
+                const card = document.createElement("div");
+                card.className = `match-card ${match.live ? 'live' : ''}`;
+
+                let homeName = match.home;
+                let awayName = match.away;
+
+                // Add icons for specific sports
+                if (match.sport === "catur") {
+                    homeName = `♔ ${homeName}`;
+                    awayName = `${awayName} ♚`;
+                } else if (match.sport === "tenis") {
+                    homeName = `🎾 ${homeName}`;
+                    awayName = `${awayName} 🎾`;
+                }
+
+                card.innerHTML = `
+                    <span class="team">${homeName}</span>
+                    <span class="score">${match.homeScore} – ${match.awayScore}</span>
+                    <span class="team">${awayName}</span>
+                `;
+                liveMatchesContainer.appendChild(card);
+            });
+        }
+
+        // Check if user is already logged in on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = localStorage.getItem('currentUser');
+
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                showApp(user.name.charAt(0).toUpperCase());
+                loadMatches();
+            } else {
+                authContainer.classList.add('fade-in');
+            }
+        });
+
+        // Simulate auto-refresh every 30 seconds
+        setInterval(() => {
+            if (appContainer.style.display === 'block') {
+                loadMatches();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
