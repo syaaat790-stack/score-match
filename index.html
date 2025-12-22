@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScoreMatch - Skor Olahraga Live</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -17,9 +18,7 @@
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            flex-direction: column;
         }
 
         /* Auth Container */
@@ -31,10 +30,11 @@
             max-width: 420px;
             overflow: hidden;
             transition: transform 0.3s ease;
+            margin: auto;
         }
 
         .auth-header {
-            background: linear-gradient(to right, #0f172a, #1e293b);
+            background: linear-gradient(to right, #0f172a, #1e3c72);
             color: white;
             text-align: center;
             padding: 25px 20px;
@@ -82,6 +82,18 @@
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
         }
 
+        .email-status {
+            font-size: 0.85rem;
+            margin-top: 6px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        .email-status.checking { display: block; background-color: #e0f2fe; color: #0369a1; border: 1px dashed #38bdf8; }
+        .email-status.available { display: block; background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .email-status.taken { display: block; background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .email-status.warning { display: block; background-color: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
+
         .auth-btn {
             background: linear-gradient(to right, #0f172a, #1e3c72);
             color: white;
@@ -121,6 +133,8 @@
         /* Main App Styles */
         #app-container {
             display: none;
+            flex: 1;
+            flex-direction: column;
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
@@ -173,6 +187,7 @@
             justify-content: center;
             color: white;
             font-weight: bold;
+            font-size: 1.1rem;
         }
 
         .logout-btn {
@@ -212,9 +227,35 @@
         }
 
         main {
+            flex: 1;
             max-width: 1000px;
-            margin: 2rem auto;
+            margin: 1.5rem auto;
             padding: 0 1.5rem;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Page */
+        .welcome-banner {
+            background: linear-gradient(to right, #0f172a, #1e3c72);
+            color: white;
+            text-align: center;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .live-header {
@@ -226,11 +267,6 @@
             color: #dc2626;
             margin-bottom: 0.4rem;
             font-size: 1.8rem;
-        }
-
-        .live-header p {
-            color: #64748b;
-            font-size: 0.95rem;
         }
 
         .match-card {
@@ -267,85 +303,157 @@
             text-align: center;
         }
 
+        /* Standings Page */
+        .standings-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .standings-table th,
+        .standings-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .standings-table th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .standings-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .standings-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .rank {
+            font-weight: bold;
+            width: 40px;
+        }
+
+        .points {
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        /* News Page */
+        .news-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .news-card h3 {
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .news-meta {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            gap: 12px;
+        }
+
+        .news-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .news-content {
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        /* Profile Page */
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #38bdf8, #818cf8);
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .profile-info h2 {
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-info p {
+            color: #64748b;
+            font-size: 1.05rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 12px;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
         footer {
             text-align: center;
             padding: 1.5rem;
             color: #94a3b8;
             font-size: 0.9rem;
             background-color: #0f172a;
-            color: #cbd5e1;
-            margin-top: 3rem;
+            margin-top: auto;
         }
 
-        .welcome-banner {
-            background: linear-gradient(to right, #0f172a, #1e3c72);
-            color: white;
-            text-align: center;
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .welcome-banner h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-        }
-
-        .welcome-banner p {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-
-        /* Responsive Styles */
+        /* Responsive */
         @media (max-width: 768px) {
-            .auth-container {
-                margin: 10px;
-            }
-
-            .auth-form {
-                padding: 25px 20px;
-            }
-
-            .header-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-menu {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .match-card {
-                flex-direction: column;
-                gap: 0.8rem;
-                text-align: center;
-            }
-
-            .score {
-                font-size: 1.8rem;
-            }
-
-            .welcome-banner h1 {
-                font-size: 1.8rem;
-            }
+            .auth-container { margin: 10px auto; }
+            .nav-menu { flex-wrap: wrap; justify-content: center; }
+            .match-card { flex-direction: column; gap: 0.8rem; text-align: center; }
+            .news-meta { flex-direction: column; align-items: flex-start; }
         }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease forwards;
-        }
-
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
     </style>
 </head>
 <body>
@@ -353,20 +461,23 @@
     <div class="auth-container fade-in" id="auth-container">
         <div class="auth-header">
             <h1>⚽ ScoreMatch</h1>
-            <p>Skor Olahraga Real-Time</p>
+            <p>Hanya untuk akun Google (@gmail.com)</p>
         </div>
         <div class="auth-form">
             <div id="login-form">
-                <h2 style="text-align: center; margin-bottom: 25px; color: #1e293b;">Masuk ke Akun</h2>
+                <h2 style="text-align: center; margin-bottom: 25px; color: #1e293b;">Masuk dengan Google</h2>
                 <div class="form-group">
-                    <label for="login-email">Email</label>
-                    <input type="email" id="login-email" class="form-control" placeholder="contoh@email.com" required>
+                    <label for="login-email">Email Google</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="nama@gmail.com" required>
+                    <div id="login-email-status" class="email-status"></div>
                 </div>
                 <div class="form-group">
                     <label for="login-password">Kata Sandi</label>
                     <input type="password" id="login-password" class="form-control" placeholder="Minimal 6 karakter" required>
                 </div>
-                <button class="auth-btn" id="login-btn">Masuk</button>
+                <button class="auth-btn" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Masuk dengan Google
+                </button>
                 <div class="auth-switch">
                     <span>Belum punya akun?</span>
                     <a href="#" id="show-signup">Daftar di sini</a>
@@ -374,20 +485,23 @@
             </div>
 
             <div id="signup-form" style="display: none;">
-                <h2 style="text-align: center; margin-bottom: 25px; color: #1e293b;">Buat Akun Baru</h2>
+                <h2 style="text-align: center; margin-bottom: 25px; color: #1e293b;">Daftar Akun Google</h2>
                 <div class="form-group">
                     <label for="signup-name">Nama Lengkap</label>
                     <input type="text" id="signup-name" class="form-control" placeholder="Nama Anda" required>
                 </div>
                 <div class="form-group">
-                    <label for="signup-email">Email</label>
-                    <input type="email" id="signup-email" class="form-control" placeholder="contoh@email.com" required>
+                    <label for="signup-email">Email Google</label>
+                    <input type="email" id="signup-email" class="form-control" placeholder="nama@gmail.com" required>
+                    <div id="signup-email-status" class="email-status"></div>
                 </div>
                 <div class="form-group">
                     <label for="signup-password">Kata Sandi</label>
                     <input type="password" id="signup-password" class="form-control" placeholder="Minimal 6 karakter" required>
                 </div>
-                <button class="auth-btn" id="signup-btn">Daftar</button>
+                <button class="auth-btn" id="signup-btn">
+                    <i class="fas fa-user-plus"></i> Daftar dengan Google
+                </button>
                 <div class="auth-switch">
                     <span>Sudah punya akun?</span>
                     <a href="#" id="show-login">Masuk di sini</a>
@@ -403,6 +517,12 @@
                 <div class="logo">
                     ⚽ <span>ScoreMatch</span>
                 </div>
+                <nav class="nav-menu">
+                    <a href="#" class="nav-link active" data-page="home">Beranda</a>
+                    <a href="#" class="nav-link" data-page="standings">Klasemen</a>
+                    <a href="#" class="nav-link" data-page="news">Berita</a>
+                    <a href="#" class="nav-link" data-page="profile">Profil</a>
+                </nav>
                 <div class="user-info">
                     <div id="user-display" class="user-avatar">U</div>
                     <button class="logout-btn" id="logout-btn">Keluar</button>
@@ -411,24 +531,123 @@
         </header>
 
         <main>
-            <div class="welcome-banner fade-in delay-1">
-                <h1>Selamat Datang di ScoreMatch</h1>
-                <p>Lihat skor pertandingan olahraga secara real-time dari berbagai cabang olahraga</p>
+            <!-- Home Page -->
+            <div id="home-page" class="page active">
+                <div class="welcome-banner">
+                    <h1>Selamat Datang di ScoreMatch</h1>
+                    <p>Lihat skor & klasemen olahraga secara real-time</p>
+                </div>
+
+                <div class="live-header">
+                    <h2>🔴 Pertandingan Sedang Berlangsung</h2>
+                    <p>Perbarui otomatis setiap 30 detik</p>
+                </div>
+
+                <div id="live-matches">
+                    <!-- Data skor akan dimuat di sini -->
+                </div>
             </div>
 
-            <div class="live-header fade-in delay-2">
-                <h2>🔴 Pertandingan Sedang Berlangsung</h2>
-                <p>Perbarui otomatis setiap 30 detik</p>
+            <!-- Standings Page -->
+            <div id="standings-page" class="page">
+                <h2 style="text-align: center; margin-bottom: 1.5rem; color: #0f172a;">🏆 Klasemen Liga Champions</h2>
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th class="rank">#</th>
+                            <th>Tim</th>
+                            <th>M</th>
+                            <th>M</th>
+                            <th>S</th>
+                            <th>K</th>
+                            <th>GM</th>
+                            <th>KG</th>
+                            <th class="points">Poin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="rank">1</td><td>Manchester City</td><td>6</td><td>5</td><td>1</td><td>0</td><td>15</td><td>3</td><td class="points">16</td></tr>
+                        <tr><td class="rank">2</td><td>Bayern Munich</td><td>6</td><td>4</td><td>1</td><td>1</td><td>12</td><td>5</td><td class="points">13</td></tr>
+                        <tr><td class="rank">3</td><td>Real Madrid</td><td>6</td><td>4</td><td>0</td><td>2</td><td>10</td><td>6</td><td class="points">12</td></tr>
+                        <tr><td class="rank">4</td><td>Liverpool</td><td>6</td><td>3</td><td>2</td><td>1</td><td>9</td><td>5</td><td class="points">11</td></tr>
+                        <tr><td class="rank">5</td><td>PSG</td><td>6</td><td>3</td><td>1</td><td>2</td><td>8</td><td>7</td><td class="points">10</td></tr>
+                    </tbody>
+                </table>
             </div>
 
-            <div id="live-matches" class="fade-in delay-3">
-                <!-- Data skor akan dimuat di sini -->
+            <!-- News Page -->
+            <div id="news-page" class="page">
+                <h2 style="text-align: center; margin-bottom: 1.5rem; color: #0f172a;">📰 Berita Olahraga Terbaru</h2>
+                
+                <div class="news-card">
+                    <h3>🏆 Real Madrid Juara Piala Dunia Antarklub 2025</h3>
+                    <div class="news-meta">
+                        <span><i class="far fa-clock"></i> 2 jam lalu</span>
+                        <span><i class="fas fa-futbol"></i> Sepak Bola</span>
+                    </div>
+                    <p class="news-content">
+                        Real Madrid sukses mengangkat trofi Piala Dunia Antarklub usai mengalahkan Palmeiras 3-0 di final.
+                        Vinicius Jr mencetak brace, sementara Bellingham menambah satu gol di menit akhir.
+                    </p>
+                </div>
+
+                <div class="news-card">
+                    <h3>🏀 LeBron James Pecahkan Rekor Poin Sepanjang Masa NBA</h3>
+                    <div class="news-meta">
+                        <span><i class="far fa-clock"></i> 1 hari lalu</span>
+                        <span><i class="fas fa-basketball-ball"></i> Basket</span>
+                    </div>
+                    <p class="news-content">
+                        LeBron James resmi menjadi pemain dengan poin terbanyak sepanjang sejarah NBA setelah mencetak 38 poin
+                        melawan Oklahoma City Thunder.
+                    </p>
+                </div>
+
+                <div class="news-card">
+                    <h3>🎾 Alcaraz Juara Wimbledon 2025</h3>
+                    <div class="news-meta">
+                        <span><i class="far fa-clock"></i> 3 hari lalu</span>
+                        <span><i class="fas fa-table-tennis"></i> Tenis</span>
+                    </div>
+                    <p class="news-content">
+                        Carlos Alcaraz mempertahankan gelar Wimbledon setelah mengalahkan Novak Djokovic dalam pertandingan
+                        epik 5 set.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile-page" class="page">
+                <div class="profile-card">
+                    <div class="profile-avatar" id="profile-avatar">U</div>
+                    <div class="profile-info">
+                        <h2 id="profile-name">Nama Pengguna</h2>
+                        <p id="profile-email">email@gmail.com</p>
+                        <p style="color: #10b981; font-weight: 500;">
+                            <i class="fas fa-check-circle"></i> Akun Google Terkonfirmasi
+                        </p>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="stat-matches">24</div>
+                            <div class="stat-label">Pertandingan</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="stat-fav">8</div>
+                            <div class="stat-label">Favorit</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="stat-notif">3</div>
+                            <div class="stat-label">Notifikasi</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 
-        <footer class="fade-in delay-4">
+        <footer>
             <p>&copy; 2025 ScoreMatch. Semua hak dilindungi.</p>
-            <p>Data simulasi untuk keperluan demo</p>
+            <p>Hanya untuk pengguna dengan akun Google (@gmail.com)</p>
         </footer>
     </div>
 
@@ -445,26 +664,117 @@
         const logoutBtn = document.getElementById('logout-btn');
         const userDisplay = document.getElementById('user-display');
         const liveMatchesContainer = document.getElementById('live-matches');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page');
 
-        // Toggle between login and signup forms
+        // ✅ Helper: cek apakah email Google (hanya @gmail.com)
+        function isGmail(email) {
+            return email.toLowerCase().endsWith('@gmail.com');
+        }
+
+        // ✅ Helper: debounced email check
+        let emailCheckTimeout;
+        function debounceEmailCheck(callback, delay = 500) {
+            return function(...args) {
+                clearTimeout(emailCheckTimeout);
+                emailCheckTimeout = setTimeout(() => callback(...args), delay);
+            };
+        }
+
+        // ✅ Fungsi utama: cek status email
+        function checkEmailStatus(email, isLogin = true) {
+            if (!email || email.length < 5) {
+                if (isLogin) document.getElementById('login-email-status').style.display = 'none';
+                else document.getElementById('signup-email-status').style.display = 'none';
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValid = emailRegex.test(email);
+            const isGoogle = isGmail(email);
+
+            const statusEl = isLogin 
+                ? document.getElementById('login-email-status') 
+                : document.getElementById('signup-email-status');
+
+            if (!isValid) {
+                statusEl.textContent = '📧 Format email tidak valid';
+                statusEl.className = 'email-status checking';
+                return;
+            }
+
+            if (!isGoogle) {
+                statusEl.textContent = '⚠️ Hanya akun @gmail.com yang diizinkan!';
+                statusEl.className = 'email-status warning';
+                return;
+            }
+
+            statusEl.textContent = '⏳ Memeriksa...';
+            statusEl.className = 'email-status checking';
+
+            setTimeout(() => {
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+
+                if (isLogin) {
+                    if (exists) {
+                        statusEl.textContent = '✅ Akun Google ditemukan.';
+                        statusEl.className = 'email-status available';
+                    } else {
+                        statusEl.textContent = '❌ Akun tidak terdaftar. Silakan daftar.';
+                        statusEl.className = 'email-status taken';
+                    }
+                } else {
+                    if (exists) {
+                        statusEl.textContent = '❌ Email sudah terdaftar!';
+                        statusEl.className = 'email-status taken';
+                    } else {
+                        statusEl.textContent = '✅ Email Google tersedia.';
+                        statusEl.className = 'email-status available';
+                    }
+                }
+            }, 300);
+        }
+
+        // Pasang event listener email
+        document.getElementById('login-email').addEventListener('input', debounceEmailCheck((e) => {
+            checkEmailStatus(e.target.value.trim(), true);
+        }));
+        document.getElementById('login-email').addEventListener('blur', (e) => {
+            checkEmailStatus(e.target.value.trim(), true);
+        });
+        document.getElementById('signup-email').addEventListener('input', debounceEmailCheck((e) => {
+            checkEmailStatus(e.target.value.trim(), false);
+        }));
+        document.getElementById('signup-email').addEventListener('blur', (e) => {
+            checkEmailStatus(e.target.value.trim(), false);
+        });
+
+        // Toggle forms
         showSignupBtn.addEventListener('click', (e) => {
             e.preventDefault();
             loginForm.style.display = 'none';
             signupForm.style.display = 'block';
+            document.getElementById('login-email-status').style.display = 'none';
         });
-
         showLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
             signupForm.style.display = 'none';
             loginForm.style.display = 'block';
+            document.getElementById('signup-email-status').style.display = 'none';
         });
 
-        // Initialize user database in localStorage if not exists
+        // Initialize users DB
         if (!localStorage.getItem('users')) {
-            localStorage.setItem('users', JSON.stringify([]));
+            // Tambahkan 2 akun demo Google
+            const demoUsers = [
+                { name: "Admin ScoreMatch", email: "admin@gmail.com", password: "admin123" },
+                { name: "User Demo", email: "user@gmail.com", password: "user123" }
+            ];
+            localStorage.setItem('users', JSON.stringify(demoUsers));
         }
 
-        // Handle signup
+        // Handle signup — HANYA izinkan @gmail.com
         signupBtn.addEventListener('click', () => {
             const name = document.getElementById('signup-name').value.trim();
             const email = document.getElementById('signup-email').value.trim();
@@ -480,28 +790,27 @@
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('users'));
+            if (!isGmail(email)) {
+                alert('❌ Hanya akun Google (@gmail.com) yang diizinkan untuk mendaftar!');
+                return;
+            }
 
-            // Check if email already exists
-            if (users.some(user => user.email === email)) {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            if (users.some(user => user.email.toLowerCase() === email.toLowerCase())) {
                 alert('Email sudah terdaftar!');
                 return;
             }
 
-            // Add new user
             users.push({ name, email, password });
             localStorage.setItem('users', JSON.stringify(users));
-
-            // Set current user
             localStorage.setItem('currentUser', JSON.stringify({ name, email }));
 
-            // Switch to app
-            showApp(name.charAt(0).toUpperCase());
+            showApp(name.charAt(0).toUpperCase(), name, email);
             resetForms();
             loadMatches();
         });
 
-        // Handle login
+        // Handle login — HANYA akun yang terdaftar & @gmail.com
         loginBtn.addEventListener('click', () => {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value.trim();
@@ -511,89 +820,106 @@
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('users'));
-            const user = users.find(u => u.email === email && u.password === password);
-
-            if (user) {
-                // Set current user
-                localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email }));
-
-                // Switch to app
-                showApp(user.name.charAt(0).toUpperCase());
-                resetForms();
-                loadMatches();
-            } else {
-                alert('Email atau kata sandi salah!');
+            if (!isGmail(email)) {
+                alert('❌ Hanya akun Google (@gmail.com) yang diizinkan untuk login!');
+                return;
             }
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => 
+                u.email.toLowerCase() === email.toLowerCase() && 
+                u.password === password
+            );
+
+            if (!user) {
+                // Cek apakah email-nya Gmail tapi belum terdaftar
+                const isRegistered = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+                if (!isRegistered) {
+                    alert('❌ Akun tidak ditemukan! Hanya akun Google yang terdaftar di sistem ini.');
+                } else {
+                    alert('🔒 Kata sandi salah!');
+                }
+                return;
+            }
+
+            localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email }));
+            showApp(user.name.charAt(0).toUpperCase(), user.name, user.email);
+            resetForms();
+            loadMatches();
         });
 
-        // Handle logout
+        // Navigation
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = e.target.dataset.page;
+
+                // Update active link
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Show target page
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(`${target}-page`).classList.add('active');
+            });
+        });
+
+        // Logout
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('currentUser');
             appContainer.style.display = 'none';
             authContainer.style.display = 'block';
             authContainer.classList.add('fade-in');
-            appContainer.classList.remove('fade-in');
+            
+            // Reset UI
+            document.getElementById('login-email-status').style.display = 'none';
+            document.getElementById('signup-email-status').style.display = 'none';
+            navLinks[0].click(); // kembali ke home
         });
 
-        // Show application after login/signup
-        function showApp(initial) {
-            // Update user avatar
+        // Show app
+        function showApp(initial, name, email) {
             userDisplay.textContent = initial;
-
-            // Hide auth container with animation
-            authContainer.classList.remove('fade-in');
+            document.getElementById('profile-avatar').textContent = initial;
+            document.getElementById('profile-name').textContent = name;
+            document.getElementById('profile-email').textContent = email;
+            
             authContainer.style.opacity = '0';
             authContainer.style.transform = 'translateY(20px)';
-
-            // Show app container after animation
             setTimeout(() => {
                 authContainer.style.display = 'none';
-                appContainer.style.display = 'block';
-                appContainer.classList.add('fade-in');
+                appContainer.style.display = 'flex';
+                loadMatches();
             }, 300);
         }
 
-        // Reset forms after successful auth
         function resetForms() {
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
             document.getElementById('signup-name').value = '';
             document.getElementById('signup-email').value = '';
             document.getElementById('signup-password').value = '';
+            document.getElementById('login-email-status').style.display = 'none';
+            document.getElementById('signup-email-status').style.display = 'none';
         }
 
-        // Mock data for live matches
+        // Mock data
         const mockLiveMatches = [
             { home: "Manchester United", away: "Liverpool", homeScore: 2, awayScore: 1, live: true },
             { home: "Real Madrid", away: "Barcelona", homeScore: 0, awayScore: 2, live: true },
             { home: "Lakers", away: "Warriors", homeScore: 89, awayScore: 92, live: true },
             { home: "Yankees", away: "Red Sox", homeScore: 5, awayScore: 3, live: true },
-            { home: "Djokovic", away: "Alcaraz", homeScore: 1, awayScore: 1, live: true, sport: "tenis" },
-            { home: "Magnus Carlsen", away: "Ian Nepomniachtchi", homeScore: 1, awayScore: 0, live: true, sport: "catur", icon: "♔" }
+            { home: "Djokovic", away: "Alcaraz", homeScore: 1, awayScore: 1, live: true, sport: "tenis" }
         ];
 
-        // Render matches to UI
         function loadMatches() {
             liveMatchesContainer.innerHTML = '';
-
-            if (mockLiveMatches.length === 0) {
-                liveMatchesContainer.innerHTML = "<p class='no-matches'>🎯 Tidak ada pertandingan live saat ini.</p>";
-                return;
-            }
-
             mockLiveMatches.forEach(match => {
                 const card = document.createElement("div");
                 card.className = `match-card ${match.live ? 'live' : ''}`;
-
                 let homeName = match.home;
                 let awayName = match.away;
-
-                // Add icons for specific sports
-                if (match.sport === "catur") {
-                    homeName = `♔ ${homeName}`;
-                    awayName = `${awayName} ♚`;
-                } else if (match.sport === "tenis") {
+                if (match.sport === "tenis") {
                     homeName = `🎾 ${homeName}`;
                     awayName = `${awayName} 🎾`;
                 }
@@ -607,22 +933,21 @@
             });
         }
 
-        // Check if user is already logged in on page load
+        // Check login on load
         document.addEventListener('DOMContentLoaded', () => {
             const currentUser = localStorage.getItem('currentUser');
-
             if (currentUser) {
                 const user = JSON.parse(currentUser);
-                showApp(user.name.charAt(0).toUpperCase());
+                showApp(user.name.charAt(0).toUpperCase(), user.name, user.email);
                 loadMatches();
             } else {
-                authContainer.classList.add('fade-in');
+                authContainer.style.display = 'block';
             }
         });
 
-        // Simulate auto-refresh every 30 seconds
+        // Auto-refresh
         setInterval(() => {
-            if (appContainer.style.display === 'block') {
+            if (appContainer.style.display === 'flex') {
                 loadMatches();
             }
         }, 30000);
