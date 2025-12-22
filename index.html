@@ -82,6 +82,13 @@
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
         }
 
+        /* Styling khusus OTP input */
+        .otp-input {
+            letter-spacing: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
         .email-status {
             font-size: 0.85rem;
             margin-top: 6px;
@@ -476,7 +483,7 @@
                     <input type="password" id="login-password" class="form-control" placeholder="Minimal 6 karakter" required>
                 </div>
                 <button class="auth-btn" id="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Masuk dengan Google
+                    <i class="fas fa-sign-in-alt"></i> Lanjut ke Verifikasi
                 </button>
                 <div class="auth-switch">
                     <span>Belum punya akun?</span>
@@ -505,6 +512,27 @@
                 <div class="auth-switch">
                     <span>Sudah punya akun?</span>
                     <a href="#" id="show-login">Masuk di sini</a>
+                </div>
+            </div>
+
+            <!-- 🔐 HALAMAN VERIFIKASI OTP -->
+            <div id="otp-form" style="display: none;">
+                <h2 style="text-align: center; margin-bottom: 25px; color: #1e293b;">🔐 Verifikasi 2FA</h2>
+                <p id="otp-instruction" style="text-align: center; color: #64748b; margin-bottom: 20px;">
+                    Masukkan kode 6-digit dari Google Authenticator atau email Anda.
+                </p>
+                <div class="form-group">
+                    <label for="otp-code">Kode Verifikasi (6 digit)</label>
+                    <input type="text" id="otp-code" class="form-control otp-input" 
+                           placeholder="______" maxlength="6" inputmode="numeric" required>
+                    <div id="otp-status" class="email-status" style="margin-top: 8px; display: none;"></div>
+                </div>
+                <button class="auth-btn" id="verify-otp-btn">
+                    <i class="fas fa-key"></i> Verifikasi Kode
+                </button>
+                <div class="auth-switch">
+                    <span>Kembali ke</span>
+                    <a href="#" id="back-to-login">Login</a>
                 </div>
             </div>
         </div>
@@ -626,6 +654,10 @@
                         <p style="color: #10b981; font-weight: 500;">
                             <i class="fas fa-check-circle"></i> Akun Google Terkonfirmasi
                         </p>
+                        <!-- ✅ Status 2FA -->
+                        <p style="color: #0ea5e9; font-weight: 500; margin-top: 8px;">
+                            <i class="fas fa-shield-alt"></i> Verifikasi 2 Langkah: <strong>Aktif</strong>
+                        </p>
                     </div>
                     <div class="profile-stats">
                         <div class="stat-box">
@@ -657,10 +689,13 @@
         const appContainer = document.getElementById('app-container');
         const loginForm = document.getElementById('login-form');
         const signupForm = document.getElementById('signup-form');
+        const otpForm = document.getElementById('otp-form');
         const showSignupBtn = document.getElementById('show-signup');
         const showLoginBtn = document.getElementById('show-login');
         const loginBtn = document.getElementById('login-btn');
         const signupBtn = document.getElementById('signup-btn');
+        const verifyOtpBtn = document.getElementById('verify-otp-btn');
+        const backToLoginBtn = document.getElementById('back-to-login');
         const logoutBtn = document.getElementById('logout-btn');
         const userDisplay = document.getElementById('user-display');
         const liveMatchesContainer = document.getElementById('live-matches');
@@ -755,12 +790,14 @@
             e.preventDefault();
             loginForm.style.display = 'none';
             signupForm.style.display = 'block';
+            otpForm.style.display = 'none';
             document.getElementById('login-email-status').style.display = 'none';
         });
         showLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
             signupForm.style.display = 'none';
             loginForm.style.display = 'block';
+            otpForm.style.display = 'none';
             document.getElementById('signup-email-status').style.display = 'none';
         });
 
@@ -810,7 +847,7 @@
             loadMatches();
         });
 
-        // Handle login — HANYA akun yang terdaftar & @gmail.com
+        // ✅ Handle login — Sekarang hanya menyimpan user & generate OTP
         loginBtn.addEventListener('click', () => {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value.trim();
@@ -832,7 +869,6 @@
             );
 
             if (!user) {
-                // Cek apakah email-nya Gmail tapi belum terdaftar
                 const isRegistered = users.some(u => u.email.toLowerCase() === email.toLowerCase());
                 if (!isRegistered) {
                     alert('❌ Akun tidak ditemukan! Hanya akun Google yang terdaftar di sistem ini.');
@@ -842,10 +878,72 @@
                 return;
             }
 
-            localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email }));
-            showApp(user.name.charAt(0).toUpperCase(), user.name, user.email);
-            resetForms();
-            loadMatches();
+            // ✅ Login sukses → generate OTP & tampilkan halaman verifikasi
+            const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
+            console.log(`[DEBUG] OTP untuk ${email}: ${otp}`); // Hanya untuk demo/dev
+
+            // Simpan sementara di sessionStorage
+            sessionStorage.setItem('pendingUser', JSON.stringify({ name: user.name, email: user.email }));
+            sessionStorage.setItem('expectedOtp', otp);
+
+            // Ganti tampilan ke halaman OTP
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'none';
+            otpForm.style.display = 'block';
+            document.getElementById('otp-instruction').textContent = 
+                `Kode verifikasi untuk ${user.email} adalah: ${otp} (simulasi)`;
+            
+            // Auto-focus input OTP
+            document.getElementById('otp-code').focus();
+        });
+
+        // ✅ Handle OTP verification
+        verifyOtpBtn.addEventListener('click', () => {
+            const inputOtp = document.getElementById('otp-code').value.trim();
+            const expectedOtp = sessionStorage.getItem('expectedOtp');
+            const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser'));
+
+            const statusEl = document.getElementById('otp-status');
+            statusEl.style.display = 'block';
+
+            if (inputOtp === expectedOtp) {
+                // ✅ OTP benar → login sukses
+                statusEl.className = 'email-status available';
+                statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Verifikasi berhasil!';
+                
+                setTimeout(() => {
+                    // Simpan user ke localStorage (login permanen)
+                    localStorage.setItem('currentUser', JSON.stringify(pendingUser));
+                    
+                    // Bersihkan OTP session
+                    sessionStorage.removeItem('pendingUser');
+                    sessionStorage.removeItem('expectedOtp');
+                    
+                    // Tampilkan aplikasi
+                    showApp(
+                        pendingUser.name.charAt(0).toUpperCase(), 
+                        pendingUser.name, 
+                        pendingUser.email
+                    );
+                    resetForms();
+                    loadMatches();
+                }, 800);
+            } else {
+                // ❌ OTP salah
+                statusEl.className = 'email-status taken';
+                statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Kode salah! Coba lagi.';
+                document.getElementById('otp-code').value = '';
+                document.getElementById('otp-code').focus();
+            }
+        });
+
+        // ✅ Tombol kembali ke login dari OTP
+        backToLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.removeItem('pendingUser');
+            sessionStorage.removeItem('expectedOtp');
+            otpForm.style.display = 'none';
+            loginForm.style.display = 'block';
         });
 
         // Navigation
@@ -854,11 +952,9 @@
                 e.preventDefault();
                 const target = e.target.dataset.page;
 
-                // Update active link
                 navLinks.forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
 
-                // Show target page
                 pages.forEach(page => page.classList.remove('active'));
                 document.getElementById(`${target}-page`).classList.add('active');
             });
@@ -867,14 +963,12 @@
         // Logout
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('currentUser');
+            sessionStorage.removeItem('pendingUser');
+            sessionStorage.removeItem('expectedOtp');
             appContainer.style.display = 'none';
             authContainer.style.display = 'block';
-            authContainer.classList.add('fade-in');
-            
-            // Reset UI
-            document.getElementById('login-email-status').style.display = 'none';
-            document.getElementById('signup-email-status').style.display = 'none';
-            navLinks[0].click(); // kembali ke home
+            resetForms();
+            navLinks[0].click();
         });
 
         // Show app
@@ -899,8 +993,10 @@
             document.getElementById('signup-name').value = '';
             document.getElementById('signup-email').value = '';
             document.getElementById('signup-password').value = '';
+            document.getElementById('otp-code').value = '';
             document.getElementById('login-email-status').style.display = 'none';
             document.getElementById('signup-email-status').style.display = 'none';
+            document.getElementById('otp-status').style.display = 'none';
         }
 
         // Mock data
